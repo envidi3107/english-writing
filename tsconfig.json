@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
+    "paths": { "@shared/*": ["./supabase/functions/_shared/*"], "@/*": ["./src/*"] }
+  },
+  "include": ["src", "supabase/functions/_shared", "supabase/functions/grade-submission/handler.ts", "supabase/functions/grade-submission/handler.test.ts", "supabase/functions/grade-submission/gemini.ts", "supabase/functions/grade-submission/gemini.test.ts"]
+}

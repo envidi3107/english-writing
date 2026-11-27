@@ -1,0 +1,24 @@
+const VN_OFFSET_MS = 7 * 60 * 60 * 1000;
+
+/** Calendar date ('YYYY-MM-DD') in Vietnam time (UTC+7). */
+export function vnDateString(now: Date): string {
+  return new Date(now.getTime() + VN_OFFSET_MS).toISOString().slice(0, 10);
+}
+
+function addDays(date: string, days: number): string {
+  const d = new Date(`${date}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+export function nextStreak(
+  prev: { count: number; lastActiveDate: string | null },
+  now: Date,
+): { count: number; lastActiveDate: string } {
+  const today = vnDateString(now);
+  if (prev.lastActiveDate === today) return { count: Math.max(1, prev.count), lastActiveDate: today };
+  if (prev.lastActiveDate && addDays(prev.lastActiveDate, 1) === today) {
+    return { count: prev.count + 1, lastActiveDate: today };
+  }
+  return { count: 1, lastActiveDate: today };
+}
