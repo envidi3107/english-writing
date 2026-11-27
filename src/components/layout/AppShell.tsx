@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import { displayStreak } from '@shared/streak.ts';
 import { BookOpen, History, Settings2, UserRound } from 'lucide-react';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { cx } from '@/components/ui';
@@ -18,7 +19,7 @@ function StatPills() {
     <div className="flex items-center gap-2 text-[14px] font-bold">
       <span className="inline-flex items-center gap-1 rounded-full bg-[#fff1e6] px-2.5 py-1 text-[#c2410c]" title="Chuỗi ngày học liên tục">
         <span aria-hidden>🔥</span>
-        {profile.streak_count}
+        {displayStreak(profile, new Date())}
         <span className="sr-only">ngày liên tục</span>
       </span>
       <span className="inline-flex items-center gap-1 rounded-full bg-xp px-2.5 py-1 text-xp-ink" title="Tổng điểm kinh nghiệm">

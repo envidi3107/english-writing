@@ -1,4 +1,4 @@
-import { nextStreak, vnDateString } from './streak.ts';
+import { displayStreak, nextStreak, vnDateString } from './streak.ts';
 
 test('vnDateString uses UTC+7', () => {
   expect(vnDateString(new Date('2026-11-27T16:59:59Z'))).toBe('2026-11-27');
@@ -30,4 +30,15 @@ test('nextStreak at VN midnight boundary', () => {
   // 17:30 UTC on the 27th is 00:30 on the 28th in Vietnam.
   expect(nextStreak({ count: 2, lastActiveDate: '2026-11-27' }, new Date('2026-11-27T17:30:00Z')))
     .toEqual({ count: 3, lastActiveDate: '2026-11-28' });
+});
+
+test('displayStreak keeps the streak alive through yesterday', () => {
+  const now = new Date('2026-11-27T03:00:00Z');
+  expect(displayStreak({ streak_count: 7, last_active_date: '2026-11-27' }, now)).toBe(7);
+  expect(displayStreak({ streak_count: 7, last_active_date: '2026-11-26' }, now)).toBe(7);
+});
+
+test('displayStreak shows 0 after a missed day', () => {
+  expect(displayStreak({ streak_count: 7, last_active_date: '2026-11-24' }, new Date('2026-11-27T03:00:00Z'))).toBe(0);
+  expect(displayStreak({ streak_count: 0, last_active_date: null }, new Date('2026-11-27T03:00:00Z'))).toBe(0);
 });

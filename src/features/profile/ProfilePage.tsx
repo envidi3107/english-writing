@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, LogOut, Sparkles } from 'lucide-react';
 import { isPassed } from '@shared/scoring.ts';
+import { displayStreak } from '@shared/streak.ts';
 import { Button, Card, Chip, ErrorNote, TextField } from '@/components/ui';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { authErrorVi } from '@/features/auth/AuthLayout';
@@ -68,7 +69,7 @@ export function ProfilePage() {
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label="Thống kê">
         <Tile label="Tổng XP" value={profile?.xp ?? 0} />
-        <Tile label="Chuỗi ngày học" value={`${profile?.streak_count ?? 0} 🔥`} />
+        <Tile label="Chuỗi ngày học" value={`${profile ? displayStreak(profile, new Date()) : 0} 🔥`} />
         <Tile label="Bài đã nộp" value={submissions.data?.length ?? 0} />
         <Tile label="Bài đã qua" value={passedCount} />
       </section>

@@ -22,3 +22,11 @@ export function nextStreak(
   }
   return { count: 1, lastActiveDate: today };
 }
+
+/** Streak to show right now: a streak whose last activity is older than yesterday (VN time) has lapsed. */
+export function displayStreak(profile: { streak_count: number; last_active_date: string | null }, now: Date): number {
+  const today = vnDateString(now);
+  const last = profile.last_active_date;
+  if (!last) return 0;
+  return last === today || addDays(last, 1) === today ? profile.streak_count : 0;
+}
