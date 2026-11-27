@@ -19,7 +19,7 @@ const SettingsPage = lazy(() => import('@/features/admin/SettingsPage').then((m)
 
 export function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Suspense fallback={<PageSpinner />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
