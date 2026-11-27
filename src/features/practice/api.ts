@@ -43,7 +43,12 @@ export function useExerciseContext(id: string) {
       best: curriculum.data.progress.get(id),
     };
   }
-  return { data, isLoading: exercise.isLoading || curriculum.isLoading, error: exercise.error ?? curriculum.error };
+  return {
+    data,
+    isLoading: exercise.isLoading || curriculum.isLoading,
+    isFetching: curriculum.isFetching,
+    error: exercise.error ?? curriculum.error,
+  };
 }
 
 const NETWORK_ERROR: GradeResponse = {

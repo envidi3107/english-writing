@@ -38,7 +38,7 @@ function GradingState() {
 
 export function ExercisePage() {
   const { exerciseId = '' } = useParams();
-  const { data, isLoading, error } = useExerciseContext(exerciseId);
+  const { data, isLoading, isFetching, error } = useExerciseContext(exerciseId);
   const [answer, setAnswer, clearDraft] = useDraft(exerciseId);
   const [phase, setPhase] = useState<Phase>({ kind: 'writing' });
   const [forId, setForId] = useState(exerciseId);
@@ -57,6 +57,7 @@ export function ExercisePage() {
   }
   const { exercise, topic, isOpen, nextExerciseId, best } = data;
 
+  if (!isOpen && isFetching) return <PageSpinner />; // progress may be stale right after an unlock
   if (!isOpen) {
     return (
       <EmptyState title="Bài này chưa mở" action={<Link className="font-semibold text-indigo" to={`/topics/${topic.id}`}>Về chủ đề</Link>}>

@@ -11,11 +11,13 @@ const exercise: ExerciseRow = {
 };
 
 const gradeSubmission = vi.fn();
+const ctx = { isOpen: true, isFetching: false };
 vi.mock('./api', () => ({
   useExerciseContext: () => ({
     isLoading: false,
+    isFetching: ctx.isFetching,
     error: null,
-    data: { exercise, levelPosition: 1, levelTitle: 'Làm quen', topic: { id: 'T1', title: 'Gia đình', icon: '👨' }, isOpen: true, nextExerciseId: 'E2', best: undefined },
+    data: { exercise, levelPosition: 1, levelTitle: 'Làm quen', topic: { id: 'T1', title: 'Gia đình', icon: '👨' }, isOpen: ctx.isOpen, nextExerciseId: 'E2', best: undefined },
   }),
   gradeSubmission: (...args: unknown[]) => gradeSubmission(...args),
 }));
@@ -42,6 +44,8 @@ function renderPage() {
 beforeEach(() => {
   localStorage.clear();
   gradeSubmission.mockReset();
+  ctx.isOpen = true;
+  ctx.isFetching = false;
 });
 
 test('submit disabled for whitespace answer', async () => {
@@ -66,4 +70,18 @@ test('hint chip inserts the word into the answer', async () => {
   renderPage();
   await userEvent.click(screen.getByRole('button', { name: 'Chèn từ father' }));
   expect(screen.getByRole('textbox', { name: 'Bài viết của bạn' })).toHaveValue('father ');
+});
+
+test('waits for fresh progress instead of flashing "locked" right after unlocking', () => {
+  ctx.isOpen = false;
+  ctx.isFetching = true;
+  renderPage();
+  expect(screen.queryByText('Bài này chưa mở')).not.toBeInTheDocument();
+  expect(screen.getByRole('status')).toBeInTheDocument();
+});
+
+test('shows locked once progress is fresh', () => {
+  ctx.isOpen = false;
+  renderPage();
+  expect(screen.getByText('Bài này chưa mở')).toBeInTheDocument();
 });

@@ -62,6 +62,7 @@ export function useCurriculum() {
     data,
     isLoading: levels.isLoading || progress.isLoading,
     error: levels.error ?? progress.error,
+    isFetching: levels.isFetching || progress.isFetching,
     refetch: () => Promise.all([levels.refetch(), progress.refetch()]),
   };
 }

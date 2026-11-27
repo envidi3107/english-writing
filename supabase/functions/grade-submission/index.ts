@@ -17,6 +17,11 @@ const json = (status: number, body: unknown) =>
 const model = Deno.env.get('GEMINI_MODEL') || 'gemini-2.5-flash';
 const fake = Deno.env.get('FAKE_AI') === 'true';
 const apiKey = Deno.env.get('GEMINI_API_KEY') ?? '';
+if (fake) {
+  const url = Deno.env.get('SUPABASE_URL') ?? '';
+  const local = /127\.0\.0\.1|localhost|kong/.test(url);
+  console.warn(`FAKE_AI=true: grades are canned samples, Gemini is NOT called${local ? '' : ' — THIS LOOKS LIKE A HOSTED PROJECT'}`);
+}
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
   auth: { persistSession: false, autoRefreshToken: false },
