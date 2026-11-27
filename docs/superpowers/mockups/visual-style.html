@@ -1,0 +1,105 @@
+<h2>Phong cách nào hợp với học viên của bạn?</h2>
+<p class="subtitle">Cả ba bản đều là màn hình <b>sau khi AI chấm bài</b>: đề bài, đoạn văn đã sửa, điểm số và danh sách lỗi. Bấm vào bản bạn thích (có thể kết hợp ý từ nhiều bản).</p>
+
+<style>
+  .mk{border-radius:12px;overflow:hidden;font-size:13px;line-height:1.55;text-align:left}
+  .mk *{box-sizing:border-box}
+  .del{text-decoration:line-through;text-decoration-thickness:2px}
+  .chip{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600}
+  /* A */
+  .a{background:#fbf7ef;color:#2b2622;font-family:Georgia,'Times New Roman',serif;border:1px solid #e8dfcd}
+  .a .top{padding:12px 16px;border-bottom:1px dashed #d9ccb2;display:flex;justify-content:space-between;align-items:center}
+  .a .score{width:54px;height:54px;border-radius:50%;border:3px solid #c0392b;color:#c0392b;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;transform:rotate(-8deg)}
+  .a .paper{padding:14px 16px;background:repeating-linear-gradient(#fbf7ef 0 23px,#e9e1cf 23px 24px);line-height:24px}
+  .a .del{color:#c0392b}
+  .a .ins{color:#c0392b;font-style:italic}
+  .a .note{margin:0 16px 14px;padding:10px 12px;background:#fff;border-left:3px solid #c0392b;font-family:system-ui,sans-serif;font-size:12px}
+  /* B */
+  .b{background:#f4f6ff;color:#1e2140;font-family:system-ui,'Segoe UI',sans-serif;border:1px solid #dfe3fb}
+  .b .top{padding:12px 16px;background:#5b5bd6;color:#fff;display:flex;justify-content:space-between;align-items:center}
+  .b .stars{font-size:16px;letter-spacing:2px}
+  .b .body{padding:14px 16px}
+  .b .text{background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 0 #dfe3fb}
+  .b .del{color:#e5484d;background:#ffecec;border-radius:4px;padding:0 2px}
+  .b .ins{color:#18794e;background:#e6f6ee;border-radius:4px;padding:0 3px;font-weight:600}
+  .b .err{margin-top:10px;display:flex;gap:8px;align-items:flex-start;background:#fff;border-radius:12px;padding:10px;font-size:12px;box-shadow:0 2px 0 #dfe3fb}
+  .b .xp{background:#ffd23f;color:#5a4300}
+  /* C */
+  .c{background:#ffffff;color:#18181b;font-family:'Inter',system-ui,sans-serif;border:1px solid #e4e4e7;display:grid;grid-template-columns:1.35fr 1fr}
+  .c .left{padding:14px 16px;border-right:1px solid #e4e4e7}
+  .c .right{padding:14px;background:#fafafa}
+  .c .lbl{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#71717a;margin-bottom:6px}
+  .c .del{color:#a1a1aa}
+  .c .ins{background:#d1fae5;color:#065f46;padding:0 2px;border-radius:3px}
+  .c .hl{border-bottom:2px solid #f59e0b}
+  .c .bar{height:6px;border-radius:3px;background:#e4e4e7;margin:3px 0 8px;overflow:hidden}
+  .c .bar i{display:block;height:100%;background:#0d9488}
+  .c .row{display:flex;justify-content:space-between;font-size:11px}
+</style>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mk a">
+        <div class="top">
+          <div><div style="font-size:11px;color:#8a7d66;font-family:system-ui">Bài 3 · My Family</div><b>Write about your family (40–60 words)</b></div>
+          <div class="score">7.5</div>
+        </div>
+        <div class="paper">
+          My family <span class="del">have</span> <span class="ins">has</span> four people. My father <span class="del">work</span> <span class="ins">works</span> in <span class="ins">a</span> bank. My mother is <span class="del">a</span> teacher <span class="ins">a</span> ... We <span class="del">is</span> <span class="ins">are</span> very happy.
+        </div>
+        <div class="note"><b>Cô giáo nhận xét:</b> Bài viết rõ ý, đủ độ dài. Em cần chú ý <b>chia động từ ngôi thứ ba số ít</b> (works, has).</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A · Vở ghi &amp; bút đỏ</h3>
+      <p>Như được cô giáo chấm vở: nền giấy kẻ dòng, chữ có chân, nét sửa đỏ. Ấm áp, gần gũi, "có người thật chấm".</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mk b">
+        <div class="top">
+          <div><div style="font-size:11px;opacity:.8">Bài 3 · My Family</div><b>Write about your family</b></div>
+          <div style="text-align:right"><div class="stars">★★★☆</div><span class="chip xp">+30 XP</span></div>
+        </div>
+        <div class="body">
+          <div class="text">
+            My family <span class="del">have</span> <span class="ins">has</span> four people. My father <span class="del">work</span> <span class="ins">works</span> in <span class="ins">a</span> bank. We <span class="del">is</span> <span class="ins">are</span> very happy.
+          </div>
+          <div class="err"><span class="chip" style="background:#ffecec;color:#e5484d">Ngữ pháp</span><div><b>work → works</b><br>Chủ ngữ "My father" là ngôi thứ 3 số ít nên động từ thêm <b>-s</b>.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B · Tươi vui &amp; có thưởng</h3>
+      <p>Màu sáng, bo tròn, sao và điểm XP để tạo động lực mỗi ngày. Mỗi lỗi là một thẻ giải thích riêng.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mk c">
+        <div class="left">
+          <div class="lbl">Bài làm đã sửa</div>
+          My family <span class="del">have</span> <span class="ins">has</span> four people. My father <span class="del">work</span> <span class="ins">works</span> in <span class="ins">a</span> bank. My mother is <span class="hl">very kind and beautiful</span>. We <span class="del">is</span> <span class="ins">are</span> very happy.
+        </div>
+        <div class="right">
+          <div class="lbl">Điểm · 7.5/10</div>
+          <div class="row"><span>Ngữ pháp</span><span>6/10</span></div><div class="bar"><i style="width:60%"></i></div>
+          <div class="row"><span>Từ vựng</span><span>8/10</span></div><div class="bar"><i style="width:80%"></i></div>
+          <div class="row"><span>Đúng đề</span><span>9/10</span></div><div class="bar"><i style="width:90%"></i></div>
+          <div class="lbl" style="margin-top:6px">4 lỗi · 1 gợi ý</div>
+          <div style="font-size:11px;color:#52525b">Chia động từ (3) · Mạo từ (1)</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C · Tối giản, tập trung</h3>
+      <p>Bố cục hai cột: bài làm bên trái, điểm theo từng tiêu chí bên phải. Gọn, nghiêm túc, giống công cụ viết chuyên nghiệp.</p>
+    </div>
+  </div>
+
+</div>
