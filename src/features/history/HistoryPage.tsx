@@ -62,7 +62,7 @@ export function HistoryPage() {
                   {s.exercise && <Chip tone={TYPE_TONE[s.exercise.type]}>{TYPE_LABEL[s.exercise.type]}</Chip>}
                   <span className="text-[13px] text-muted">{formatDateTimeVi(s.created_at)}</span>
                 </span>
-                <span className="mt-1 block truncate font-semibold">{s.exercise?.title ?? 'Bài tập đã ẩn'}</span>
+                <span className="mt-1 line-clamp-2 block font-semibold">{s.exercise?.title ?? 'Bài tập đã ẩn'}</span>
               </span>
               <span className="flex flex-col items-end gap-1">
                 <Stars value={s.stars} size={16} />

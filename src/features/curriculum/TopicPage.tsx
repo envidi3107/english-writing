@@ -46,7 +46,7 @@ export function TopicPage() {
               </span>
               <span className="min-w-0 flex-1">
                 <Chip tone={TYPE_TONE[e.type]}>{TYPE_LABEL[e.type]}</Chip>
-                <span className="mt-1 block truncate font-semibold">{e.title}</span>
+                <span className="mt-1 line-clamp-2 block font-semibold">{e.title}</span>
               </span>
               {p ? <Stars value={p.best_stars} /> : open ? <span className="text-[14px] font-semibold text-indigo">Bắt đầu</span> : null}
               {open && <ChevronRight size={20} className="text-muted" aria-hidden />}
