@@ -21,7 +21,15 @@ function shiftDate(date: string, days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-export function aggregateUsage(rows: UsageInput[], now: Date): UsageSummary {
+export interface DailyUsage {
+  /** Vietnam calendar date 'YYYY-MM-DD'. */
+  date: string;
+  requests: number;
+  tokens: number;
+}
+
+/** Builds the summary from per-day buckets (e.g. the my_usage_daily RPC). */
+export function summarizeDaily(rows: DailyUsage[], now: Date): UsageSummary {
   const today = vnDateString(now);
   const month = today.slice(0, 7);
   const daily = Array.from({ length: 30 }, (_, i) => ({ date: shiftDate(today, i - 29), requests: 0, tokens: 0 }));
@@ -29,23 +37,35 @@ export function aggregateUsage(rows: UsageInput[], now: Date): UsageSummary {
   const summary: UsageSummary = { todayRequests: 0, todayTokens: 0, monthRequests: 0, monthTokens: 0, daily };
 
   for (const r of rows) {
-    const date = vnDateString(new Date(r.created_at));
-    const tokens = (r.input_tokens ?? 0) + (r.output_tokens ?? 0);
-    const bucket = byDate.get(date);
+    const requests = Number(r.requests) || 0;
+    const tokens = Number(r.tokens) || 0;
+    const bucket = byDate.get(r.date);
     if (bucket) {
-      bucket.requests += 1;
+      bucket.requests += requests;
       bucket.tokens += tokens;
     }
-    if (date === today) {
-      summary.todayRequests += 1;
+    if (r.date === today) {
+      summary.todayRequests += requests;
       summary.todayTokens += tokens;
     }
-    if (date.slice(0, 7) === month) {
-      summary.monthRequests += 1;
+    if (r.date.slice(0, 7) === month) {
+      summary.monthRequests += requests;
       summary.monthTokens += tokens;
     }
   }
   return summary;
+}
+
+/** Same summary from raw usage-log rows. */
+export function aggregateUsage(rows: UsageInput[], now: Date): UsageSummary {
+  return summarizeDaily(
+    rows.map((r) => ({
+      date: vnDateString(new Date(r.created_at)),
+      requests: 1,
+      tokens: (r.input_tokens ?? 0) + (r.output_tokens ?? 0),
+    })),
+    now,
+  );
 }
 
 export function usageTone(used: number, budget: number): 'ok' | 'warn' | 'danger' {

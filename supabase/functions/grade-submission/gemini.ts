@@ -41,10 +41,18 @@ export function createGeminiCaller(opts: CallerOptions): (prompt: Prompt) => Pro
       const data = await res.json();
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (typeof text !== 'string') throw new Error('Gemini returned no text');
+      const usage = data?.usageMetadata ?? {};
+      let json: unknown;
+      try {
+        json = JSON.parse(text);
+      } catch {
+        json = text; // parseAiVerdict rejects it, but the tokens below still get logged
+      }
       return {
-        json: JSON.parse(text),
-        inputTokens: data?.usageMetadata?.promptTokenCount ?? 0,
-        outputTokens: data?.usageMetadata?.candidatesTokenCount ?? 0,
+        json,
+        inputTokens: usage.promptTokenCount ?? 0,
+        // Thinking tokens are billed as output.
+        outputTokens: (usage.candidatesTokenCount ?? 0) + (usage.thoughtsTokenCount ?? 0),
         model: opts.model,
       };
     } finally {

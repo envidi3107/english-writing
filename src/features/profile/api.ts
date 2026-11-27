@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { aggregateUsage, type UsageSummary } from '@shared/usage.ts';
+import { summarizeDaily, type UsageSummary } from '@shared/usage.ts';
 import type { ExerciseType, GradeResult, Stars } from '@shared/types.ts';
 import { supabase, unwrap } from '@/lib/supabase';
-import type { AppSettingsRow, UsageRow } from '@/lib/db';
+import type { AppSettingsRow } from '@/lib/db';
 
 async function currentUserId(): Promise<string | null> {
   const { data } = await supabase.auth.getSession();
@@ -13,17 +13,17 @@ export function useUsage() {
   return useQuery({
     queryKey: ['usage'],
     queryFn: async (): Promise<UsageSummary & { budget: AppSettingsRow }> => {
-      const uid = await currentUserId();
-      const since = new Date(Date.now() - 32 * 24 * 3600 * 1000).toISOString();
       const [rows, settings] = await Promise.all([
-        uid
-          ? supabase.from('ai_usage_log').select('created_at, input_tokens, output_tokens').eq('user_id', uid).gte('created_at', since).limit(10000)
-          : Promise.resolve({ data: [], error: null }),
+        supabase.rpc('my_usage_daily', { p_days: 32 }),
         supabase.from('app_settings').select('*').eq('id', 1).maybeSingle(),
       ]);
-      const usage = unwrap(rows) as Pick<UsageRow, 'created_at' | 'input_tokens' | 'output_tokens'>[];
+      const daily = ((unwrap(rows) as Array<{ day: string; requests: number; tokens: number }> | null) ?? []).map((r) => ({
+        date: r.day,
+        requests: Number(r.requests),
+        tokens: Number(r.tokens),
+      }));
       const budget = (unwrap(settings) as AppSettingsRow | null) ?? { id: 1, daily_request_budget: 250, monthly_token_budget: 10_000_000 };
-      return { ...aggregateUsage(usage, new Date()), budget };
+      return { ...summarizeDaily(daily, new Date()), budget };
     },
     refetchInterval: 60_000,
   });

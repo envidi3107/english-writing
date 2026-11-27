@@ -46,3 +46,25 @@ test('fake mode returns a valid graded payload without fetching', async () => {
   expect(fetchImpl).not.toHaveBeenCalled();
   expect((res.json as { status: string }).status).toBe('graded');
 });
+
+test('counts thinking tokens as output', async () => {
+  const fetchImpl = vi.fn(async () =>
+    new Response(JSON.stringify({
+      candidates: [{ content: { parts: [{ text: '{}' }] } }],
+      usageMetadata: { promptTokenCount: 100, candidatesTokenCount: 40, thoughtsTokenCount: 300 },
+    }), { status: 200 }));
+  const call = createGeminiCaller({ apiKey: 'k', model: 'm', fetchImpl: fetchImpl as unknown as typeof fetch });
+  expect((await call(prompt)).outputTokens).toBe(340);
+});
+
+test('keeps token counts when the JSON text is invalid', async () => {
+  const fetchImpl = vi.fn(async () =>
+    new Response(JSON.stringify({
+      candidates: [{ content: { parts: [{ text: '{"status": "graded", oops' }] } }],
+      usageMetadata: { promptTokenCount: 100, candidatesTokenCount: 40 },
+    }), { status: 200 }));
+  const call = createGeminiCaller({ apiKey: 'k', model: 'm', fetchImpl: fetchImpl as unknown as typeof fetch });
+  const res = await call(prompt);
+  expect(res.inputTokens).toBe(100);
+  expect(typeof res.json).toBe('string');
+});
