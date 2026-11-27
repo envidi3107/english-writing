@@ -64,7 +64,7 @@ npx supabase test db        # pgTAP: kiểm tra RLS (cần supabase start)
    ```bash
    npx supabase login
    npx supabase link --project-ref <project-ref>
-   npx supabase db push --include-seed
+   npx supabase db push --remote --include-seed
    ```
 
 2. Đặt secret và deploy function:
