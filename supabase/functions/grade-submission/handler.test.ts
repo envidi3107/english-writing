@@ -37,9 +37,8 @@ function makeDeps(over: Partial<GradeDeps> = {}): GradeDeps {
     loadExercise: vi.fn(async (id: string) => (id === 'E1' || id === 'E2' ? { ...EX, id } : null)),
     loadCurriculum: vi.fn(async () => curriculum),
     loadProgress: vi.fn(async () => new Map()),
-    loadProfile: vi.fn(async () => ({ xp: 40, streak_count: 2, last_active_date: '2026-11-26' })),
     callGemini: vi.fn(async () => gemini(7)),
-    saveGraded: vi.fn(async () => ({ submissionId: 'S1' })),
+    saveGraded: vi.fn(async () => ({ submissionId: 'S1', xpGained: 20, streakCount: 3, newlyPassed: true })),
     logUsage: vi.fn(async () => {}),
     now: () => NOW,
     ...over,
@@ -81,25 +80,21 @@ test('grades, saves and awards xp on first 2-star', async () => {
   const res = await handleGrade(req(), 'jwt', deps);
   expect(res.status).toBe(200);
   expect(res.body).toMatchObject({ ok: true, kind: 'graded', stars: 2, xp_gained: 20, submission_id: 'S1', streak_count: 3, newly_unlocked: true });
-  expect(deps.saveGraded).toHaveBeenCalledWith(expect.objectContaining({
-    userId: 'U1', exerciseId: 'E1', answer: 'My family have four people.', stars: 2,
-    progress: { best_score: 7, best_stars: 2, attempts: 1, completed_at: NOW.toISOString() },
-    profile: { xp: 60, streak_count: 3, last_active_date: '2026-11-27' },
-  }));
+  expect(deps.saveGraded).toHaveBeenCalledWith({
+    userId: 'U1', exerciseId: 'E1', answer: 'My family have four people.', stars: 2, now: NOW,
+    result: expect.objectContaining({ overall_score: 7 }),
+  });
   expect(deps.logUsage).toHaveBeenCalledWith({ userId: 'U1', kind: 'grade', model: 'gemini-test', inputTokens: 100, outputTokens: 50, success: true });
 });
 
-test('retry with lower score keeps best and awards no xp', async () => {
+test('stars come from the AI score; xp and streak come from the atomic save', async () => {
   const deps = makeDeps({
     callGemini: vi.fn(async () => gemini(5.5)),
-    loadProgress: vi.fn(async () => new Map([['E1', { bestStars: 3, completedAt: '2026-11-20T00:00:00Z', bestScore: 9, attempts: 2 }]])),
+    saveGraded: vi.fn(async () => ({ submissionId: 'S2', xpGained: 0, streakCount: 5, newlyPassed: false })),
   });
   const res = await handleGrade(req(), 'jwt', deps);
-  expect(res.body).toMatchObject({ ok: true, kind: 'graded', stars: 1, xp_gained: 0, newly_unlocked: false });
-  expect(deps.saveGraded).toHaveBeenCalledWith(expect.objectContaining({
-    progress: { best_score: 9, best_stars: 3, attempts: 3, completed_at: '2026-11-20T00:00:00Z' },
-    profile: expect.objectContaining({ xp: 40 }),
-  }));
+  expect(res.body).toMatchObject({ ok: true, kind: 'graded', stars: 1, xp_gained: 0, streak_count: 5, newly_unlocked: false, submission_id: 'S2' });
+  expect(deps.saveGraded).toHaveBeenCalledWith(expect.objectContaining({ stars: 1 }));
 });
 
 test('rejected verdict saves nothing but logs usage', async () => {

@@ -66,28 +66,21 @@ const deps: GradeDeps = {
       rows.map((r) => [r.exercise_id, { bestStars: r.best_stars, completedAt: r.completed_at, bestScore: Number(r.best_score), attempts: r.attempts }]),
     );
   },
-  async loadProfile(userId) {
-    return must(await db.from('profiles').select('xp, streak_count, last_active_date').eq('id', userId).single());
-  },
   callGemini: createGeminiCaller({ apiKey, model, fake }),
   async saveGraded(input) {
-    const sub = must(
-      await db
-        .from('submissions')
-        .insert({
-          user_id: input.userId, exercise_id: input.exerciseId, answer: input.answer, result: input.result,
-          overall_score: input.result.overall_score, stars: input.stars,
-        })
-        .select('id')
-        .single(),
-    );
-    must(
-      await db.from('user_progress').upsert({
-        user_id: input.userId, exercise_id: input.exerciseId, ...input.progress, updated_at: new Date().toISOString(),
+    const rows = must(
+      await db.rpc('record_grade', {
+        p_user: input.userId,
+        p_exercise: input.exerciseId,
+        p_answer: input.answer,
+        p_result: input.result,
+        p_score: input.result.overall_score,
+        p_stars: input.stars,
+        p_now: input.now.toISOString(),
       }),
-    );
-    must(await db.from('profiles').update(input.profile).eq('id', input.userId));
-    return { submissionId: sub.id as string };
+    ) as Array<{ submission_id: string; xp_gained: number; streak_count: number; newly_passed: boolean }>;
+    const r = rows[0];
+    return { submissionId: r.submission_id, xpGained: r.xp_gained, streakCount: r.streak_count, newlyPassed: r.newly_passed };
   },
   async logUsage(row) {
     const { error } = await db.from('ai_usage_log').insert({

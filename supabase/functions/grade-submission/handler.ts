@@ -1,7 +1,6 @@
 import { parseAiVerdict } from '../_shared/gradeResult.ts';
 import { buildGradingPrompt } from '../_shared/prompt.ts';
-import { isPassed, starsFromScore, xpGain } from '../_shared/scoring.ts';
-import { nextStreak } from '../_shared/streak.ts';
+import { starsFromScore } from '../_shared/scoring.ts';
 import { validateAnswer } from '../_shared/text.ts';
 import type { AiVerdict, ExerciseForGrading, GradeResult, Stars } from '../_shared/types.ts';
 import { buildSequence, computeOpenExercises, type CurriculumLevel, type ProgressEntry } from '../_shared/unlock.ts';
@@ -44,17 +43,16 @@ export interface GradeDeps {
   loadExercise(id: string): Promise<(ExerciseForGrading & { id: string }) | null>;
   loadCurriculum(): Promise<CurriculumLevel[]>;
   loadProgress(userId: string): Promise<Map<string, StoredProgress>>;
-  loadProfile(userId: string): Promise<{ xp: number; streak_count: number; last_active_date: string | null }>;
   callGemini(prompt: { system: string; user: string }): Promise<GeminiCall>;
+  /** One atomic write (submission + best progress + XP + streak); see migration record_grade. */
   saveGraded(input: {
     userId: string;
     exerciseId: string;
     answer: string;
     result: GradeResult;
     stars: Stars;
-    progress: { best_score: number; best_stars: number; attempts: number; completed_at: string | null };
-    profile: { xp: number; streak_count: number; last_active_date: string };
-  }): Promise<{ submissionId: string }>;
+    now: Date;
+  }): Promise<{ submissionId: string; xpGained: number; streakCount: number; newlyPassed: boolean }>;
   logUsage(row: {
     userId: string;
     kind: 'grade' | 'admin_test';
@@ -139,36 +137,16 @@ export async function handleGrade(req: GradeRequest, jwt: string | null, deps: G
   if (!verdict) return fail(502, 'ai_error', AI_ERROR_VI);
   if (verdict.kind === 'rejected') return { status: 200, body: { ok: true, ...verdict } };
 
-  const now = deps.now();
   const result = verdict.result;
   const stars = starsFromScore(result.overall_score);
-  const prev = progress.get(exerciseId);
-  const gained = xpGain(prev?.bestStars ?? 0, stars);
-  const newlyPassed = !prev?.completedAt && isPassed(stars);
-
-  const profile = await deps.loadProfile(userId);
-  const streak = nextStreak({ count: profile.streak_count, lastActiveDate: profile.last_active_date }, now);
-
-  const { submissionId } = await deps.saveGraded({
-    userId,
-    exerciseId,
-    answer,
-    result,
-    stars,
-    progress: {
-      best_score: Math.max(prev?.bestScore ?? 0, result.overall_score),
-      best_stars: Math.max(prev?.bestStars ?? 0, stars),
-      attempts: (prev?.attempts ?? 0) + 1,
-      completed_at: prev?.completedAt ?? (newlyPassed ? now.toISOString() : null),
-    },
-    profile: { xp: profile.xp + gained, streak_count: streak.count, last_active_date: streak.lastActiveDate },
-  });
+  // XP, best progress and streak are derived atomically in the database (record_grade).
+  const saved = await deps.saveGraded({ userId, exerciseId, answer, result, stars, now: deps.now() });
 
   return {
     status: 200,
     body: {
-      ok: true, kind: 'graded', result, stars, xp_gained: gained, submission_id: submissionId,
-      streak_count: streak.count, newly_unlocked: newlyPassed,
+      ok: true, kind: 'graded', result, stars, xp_gained: saved.xpGained, submission_id: saved.submissionId,
+      streak_count: saved.streakCount, newly_unlocked: saved.newlyPassed,
     },
   };
 }
