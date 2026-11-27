@@ -21,7 +21,7 @@ export async function fetchCurriculum(): Promise<CurriculumLevelFull[]> {
   const levels = unwrap(
     await supabase
       .from('levels')
-      .select('*, topics(*, exercises(id, position, type, title, is_published, created_at))')
+      .select('*, topics(*, exercises(id, position, type, title, is_published, created_at, published_at))')
       .order('position'),
   ) as CurriculumLevelFull[];
   // Learners only see published rows (RLS); also hide children of unpublished parents for admins.

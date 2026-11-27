@@ -16,6 +16,7 @@ export interface LevelRow {
   title: string;
   description: string | null;
   is_published: boolean;
+  published_at: string | null;
   created_at: string;
 }
 
@@ -27,6 +28,7 @@ export interface TopicRow {
   description: string | null;
   icon: string | null;
   is_published: boolean;
+  published_at: string | null;
   created_at: string;
 }
 
@@ -43,6 +45,7 @@ export interface ExerciseRow {
   max_words: number | null;
   reference_answer: string | null;
   is_published: boolean;
+  published_at: string | null;
   created_at: string;
   updated_at: string;
 }

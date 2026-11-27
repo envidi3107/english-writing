@@ -2,7 +2,7 @@ import { isPassed } from '@shared/scoring.ts';
 import { buildSequence, computeOpenExercises, type ProgressEntry } from '@shared/unlock.ts';
 import type { ExerciseRow, LevelRow, ProgressRow, TopicRow } from '@/lib/db';
 
-export type ExerciseSummary = Pick<ExerciseRow, 'id' | 'position' | 'type' | 'title' | 'is_published' | 'created_at'>;
+export type ExerciseSummary = Pick<ExerciseRow, 'id' | 'position' | 'type' | 'title' | 'is_published' | 'created_at' | 'published_at'>;
 export type TopicWithExercises = TopicRow & { exercises: ExerciseSummary[] };
 export type CurriculumLevelFull = LevelRow & { topics: TopicWithExercises[] };
 

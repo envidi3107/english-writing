@@ -55,7 +55,7 @@ const deps: GradeDeps = {
   },
   async loadCurriculum() {
     return must(
-      await db.from('levels').select('id, position, is_published, topics(id, position, is_published, exercises(id, position, is_published, created_at))'),
+      await db.from('levels').select('id, position, is_published, published_at, topics(id, position, is_published, published_at, exercises(id, position, is_published, created_at, published_at))'),
     ) as CurriculumLevel[];
   },
   async loadProgress(userId) {

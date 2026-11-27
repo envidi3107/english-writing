@@ -37,6 +37,23 @@ test('exercise that existed before does gate', () => {
   expect([...open].sort()).toEqual(['A', 'X']);
 });
 
+test('old draft published after learner passed previous does not gate', () => {
+  const s = [ex('A'), { ...ex('X', '2026-10-01T00:00:00Z'), visible_since: '2026-11-10T00:00:00Z' }, ex('B')];
+  const open = computeOpenExercises(s, prog({ A: { bestStars: 3, completedAt: '2026-11-01T00:00:00Z' } }));
+  expect([...open].sort()).toEqual(['A', 'B', 'X']);
+});
+
+test('buildSequence derives visible_since from the latest published_at of exercise, topic and level', () => {
+  const levels: CurriculumLevel[] = [
+    { id: 'L1', position: 1, is_published: true, published_at: '2026-10-01T00:00:00Z', topics: [
+      { id: 'T1', position: 1, is_published: true, published_at: '2026-11-20T00:00:00Z', exercises: [
+        { ...ex('E1'), published_at: '2026-10-05T00:00:00Z' },
+      ] },
+    ] },
+  ];
+  expect(buildSequence(levels)[0].visible_since).toBe('2026-11-20T00:00:00Z');
+});
+
 test('buildSequence skips unpublished and orders by position', () => {
   const levels: CurriculumLevel[] = [
     { id: 'L2', position: 2, is_published: true, topics: [

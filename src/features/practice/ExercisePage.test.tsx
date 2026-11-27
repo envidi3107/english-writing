@@ -7,7 +7,7 @@ import type { ExerciseRow } from '@/lib/db';
 const exercise: ExerciseRow = {
   id: 'E1', topic_id: 'T1', position: 1, type: 'paragraph', title: 'Gia đình của tôi', prompt: 'Viết về gia đình bạn.',
   source_text: null, hints: { vocabulary: ['father', 'mother'], starter: 'There are' }, min_words: 25, max_words: 40,
-  reference_answer: null, is_published: true, created_at: '', updated_at: '',
+  reference_answer: null, is_published: true, published_at: null, created_at: '', updated_at: '',
 };
 
 const gradeSubmission = vi.fn();

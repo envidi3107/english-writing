@@ -2,17 +2,17 @@ import { deriveCurriculumState, type CurriculumLevelFull } from './curriculumSta
 import type { ProgressRow } from '@/lib/db';
 
 const ex = (id: string, position: number) => ({
-  id, position, type: 'paragraph' as const, title: id, is_published: true, created_at: '2026-10-01T00:00:00Z',
+  id, position, type: 'paragraph' as const, title: id, is_published: true, created_at: '2026-10-01T00:00:00Z', published_at: null,
 });
 const topic = (id: string, position: number, exercises: ReturnType<typeof ex>[]) => ({
-  id, level_id: 'L', position, title: id, description: null, icon: null, is_published: true, created_at: '', exercises,
+  id, level_id: 'L', position, title: id, description: null, icon: null, is_published: true, published_at: null, created_at: '', exercises,
 });
 const levels: CurriculumLevelFull[] = [
-  { id: 'L1', position: 1, title: 'L1', description: null, is_published: true, created_at: '', topics: [
+  { id: 'L1', position: 1, title: 'L1', description: null, is_published: true, published_at: null, created_at: '', topics: [
     topic('T1', 1, [ex('A', 1), ex('B', 2)]),
     topic('T2', 2, [ex('C', 1)]),
   ] },
-  { id: 'L2', position: 2, title: 'L2', description: null, is_published: true, created_at: '', topics: [
+  { id: 'L2', position: 2, title: 'L2', description: null, is_published: true, published_at: null, created_at: '', topics: [
     topic('T3', 1, [ex('D', 1)]),
   ] },
 ];
