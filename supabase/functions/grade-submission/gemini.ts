@@ -69,7 +69,8 @@ function fakeCall(prompt: Prompt, model: string): GeminiCall {
     if (m) {
       const fixed = fix(m[0]);
       corrected = corrected.replace(m[0], fixed);
-      errors.push({ original: m[0].trim(), correction: fixed.trim(), type: 'grammar', explanation_vi: why });
+      const clean = (s: string) => s.replace(/^[.!?]?\s*/, '').trim();
+      errors.push({ original: clean(m[0]), correction: clean(fixed), type: 'grammar', explanation_vi: why });
     }
   }
   const score = errors.length ? 7 : 9;
